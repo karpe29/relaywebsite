@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlinkofAI — AM Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0f11; --bg2: #141618; --bg3: #1a1c1f; --bg4: #1f2124;
+  --border: rgba(255,255,255,0.07); --border-med: rgba(255,255,255,0.12);
+  --text: #e8e6e0; --text2: #8a8880; --text3: #4a4845;
+  --accent: #f0e6c8;
+  --green: #4ade80; --green-bg: rgba(74,222,128,0.1);
+  --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.1);
+  --red: #f87171; --red-bg: rgba(248,113,113,0.1);
+  --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+  --purple: #a78bfa; --purple-bg: rgba(167,139,250,0.1);
+  --teal: #34d399; --teal-bg: rgba(52,211,153,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;line-height:1.5}
+
+.shell{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{padding:22px 18px 18px;border-bottom:1px solid var(--border)}
+.brand-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--accent);letter-spacing:.02em}
+.brand-sub{font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;font-family:'DM Mono',monospace}
+.nav{padding:14px 10px;flex:1}
+.nav-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:0 8px;margin:14px 0 5px;font-family:'DM Mono',monospace}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;margin-bottom:1px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg3);color:var(--text)}
+.nav-icon{width:13px;height:13px;opacity:.6;flex-shrink:0}
+.nav-item.active .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;font-size:9px;font-family:'DM Mono',monospace;background:var(--red-bg);color:var(--red);padding:1px 5px;border-radius:8px}
+.nav-badge.a{background:var(--amber-bg);color:var(--amber)}
+.sidebar-footer{padding:14px;border-top:1px solid var(--border)}
+.am-pill{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:7px}
+.am-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:white;flex-shrink:0}
+.am-name{font-size:11px;color:var(--text);font-weight:500}
+.am-role{font-size:9px;color:var(--text3)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:auto;box-shadow:0 0 5px var(--green)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:20px 28px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.page-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:600;color:var(--text)}
+.page-date{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn-ghost{background:transparent;border:1px solid var(--border-med);color:var(--text2);padding:6px 12px;border-radius:5px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+
+/* CONTENT AREA = two panels side by side */
+.content{display:grid;grid-template-columns:320px 1fr;flex:1;overflow:hidden;padding:20px 28px;gap:16px}
+
+/* LEFT: CLIENT+PROJECT LIST */
+.left-panel{display:flex;flex-direction:column;gap:0;overflow-y:auto}
+
+.stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.stat-label{font-size:9px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}
+.stat-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.stat-delta{font-size:9px;margin-top:4px;font-family:'DM Mono',monospace}
+.du{color:var(--green)}.dw{color:var(--amber)}.dr{color:var(--red)}
+
+.flags-strip{margin-bottom:14px}
+.flags-title{font-size:10px;font-weight:500;color:var(--text);font-family:'Syne',sans-serif;margin-bottom:6px}
+.flag-row{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:6px;margin-bottom:4px;border:1px solid transparent;cursor:pointer;transition:all .15s}
+.flag-row.r{background:var(--red-bg);border-color:rgba(248,113,113,0.2)}
+.flag-row.r:hover{border-color:rgba(248,113,113,0.4)}
+.flag-row.a{background:var(--amber-bg);border-color:rgba(251,191,36,0.2)}
+.flag-row.a:hover{border-color:rgba(251,191,36,0.35)}
+.flag-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.flag-dot.r{background:var(--red)}.flag-dot.a{background:var(--amber)}
+.flag-text{font-size:11px;color:var(--text);flex:1;line-height:1.4}
+.flag-sub{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px}
+
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.section-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text)}
+.section-ct{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+
+.client-block{background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden;transition:border-color .15s}
+.client-block:hover{border-color:var(--border-med)}
+.client-header{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;user-select:none}
+.client-avatar{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0}
+.av-b{background:var(--blue-bg);color:var(--blue)}
+.av-p{background:var(--purple-bg);color:var(--purple)}
+.av-g{background:var(--green-bg);color:var(--green)}
+.av-a{background:var(--amber-bg);color:var(--amber)}
+.av-r{background:var(--red-bg);color:var(--red)}
+.av-t{background:var(--teal-bg);color:var(--teal)}
+.client-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text)}
+.client-type{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+.client-meta{margin-left:auto;display:flex;align-items:center;gap:7px}
+.hp{font-size:9px;font-family:'DM Mono',monospace;font-weight:500;padding:2px 7px;border-radius:8px}
+.hp-g{background:var(--green-bg);color:var(--green)}
+.hp-a{background:var(--amber-bg);color:var(--amber)}
+.hp-r{background:var(--red-bg);color:var(--red)}
+.chevron{width:12px;height:12px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.client-block.open .chevron{transform:rotate(180deg)}
+
+.proj-list{display:none;border-top:1px solid var(--border)}
+.client-block.open .proj-list{display:block}
+.proj-row{display:flex;align-items:center;gap:8px;padding:8px 13px 8px 51px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.proj-row:last-child{border-bottom:none}
+.proj-row:hover{background:var(--bg3)}
+.proj-row.selected{background:var(--bg4);border-left:2px solid var(--accent)}
+.proj-info{flex:1;min-width:0}
+.proj-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-id{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+.sp{font-size:9px;padding:2px 7px;border-radius:8px;font-family:'DM Mono',monospace;font-weight:500;white-space:nowrap;flex-shrink:0}
+.sp-intake{background:var(--blue-bg);color:var(--blue)}
+.sp-eval{background:var(--purple-bg);color:var(--purple)}
+.sp-ob{background:var(--amber-bg);color:var(--amber)}
+.sp-prod{background:var(--green-bg);color:var(--green)}
+.sp-rev{background:rgba(251,191,36,0.15);color:var(--amber)}
+.sp-del{background:var(--bg3);color:var(--text3)}
+.sp-rej{background:var(--red-bg);color:var(--red)}
+
+/* RIGHT: PROJECT DETAIL */
+.right-panel{display:flex;flex-direction:column;gap:0;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:10px}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:10px}
+.empty-icon{width:40px;height:40px;border:1px solid var(--border-med);border-radius:10px;display:flex;align-items:center;justify-content:center}
+
+.proj-detail-header{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.pdh-left{}
+.pdh-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:3px}
+.pdh-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pdh-id{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.pdh-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.pd-btn{padding:6px 12px;border-radius:5px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid var(--border-med);background:transparent;color:var(--text2);transition:all .15s;white-space:nowrap}
+.pd-btn:hover{background:var(--bg3);color:var(--text)}
+.pd-btn.ap{border-color:rgba(74,222,128,0.3);color:var(--green)}
+.pd-btn.ap:hover{background:var(--green-bg)}
+.pd-btn.rj{border-color:rgba(248,113,113,0.3);color:var(--red)}
+.pd-btn.rj:hover{background:var(--red-bg)}
+
+/* PROJ DETAIL TABS */
+.pd-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 22px;flex-shrink:0}
+.pd-tab{font-size:11px;padding:11px 14px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;font-family:'DM Mono',monospace;white-space:nowrap}
+.pd-tab:hover{color:var(--text2)}
+.pd-tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.pd-panels{flex:1;overflow-y:auto}
+.pd-panel{display:none;padding:20px 22px}
+.pd-panel.on{display:block}
+
+/* OVERVIEW TAB */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.ov-card{background:var(--bg3);border-radius:7px;padding:12px 14px}
+.ov-label{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.ov-val{font-size:13px;font-weight:500;color:var(--text)}
+.ov-val.mono{font-family:'DM Mono',monospace;font-size:12px}
+.ov-sub{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px}
+.completeness-wrap{background:var(--bg):border-radius:3px;height:3px;margin-top:6px;background:var(--bg)}
+.cbar{height:3px;border-radius:3px;transition:width .3s}
+
+.brief-block{background:var(--bg3);border-radius:7px;padding:14px;margin-bottom:14px}
+.brief-label{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.brief-text{font-size:12px;color:var(--text2);line-height:1.7}
+.brief-tabs{display:flex;gap:4px;margin-bottom:10px}
+.brief-tab{font-size:9px;padding:3px 8px;border-radius:10px;cursor:pointer;border:1px solid var(--border-med);color:var(--text3);font-family:'DM Mono',monospace;transition:all .15s}
+.brief-tab.on{background:var(--bg4);color:var(--text2);border-color:var(--border-med)}
+
+.missing-fields{margin-top:10px}
+.missing-row{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border)}
+.missing-row:last-child{border-bottom:none}
+.missing-dot{width:5px;height:5px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.missing-text{font-size:11px;color:var(--text2)}
+
+/* WORKFLOW TAB */
+.phases{}
+.phase-block{margin-bottom:18px}
+.phase-label{font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.phase-progress{flex:1;height:2px;background:var(--bg3);border-radius:2px}
+.phase-fill{height:2px;border-radius:2px;transition:width .4s}
+
+.step-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);position:relative}
+.step-row:last-child{border-bottom:none}
+.step-icon{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-med);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-icon.done{background:var(--green-bg);border-color:rgba(74,222,128,0.4)}
+.step-icon.active{background:var(--blue-bg);border-color:rgba(96,165,250,0.4)}
+.step-icon.blocked{background:var(--red-bg);border-color:rgba(248,113,113,0.3)}
+.step-icon.waiting{background:var(--amber-bg);border-color:rgba(251,191,36,0.3)}
+.step-icon.skipped{background:var(--bg3);border-color:var(--border)}
+.step-icon.pending{background:var(--bg3);border-color:var(--border)}
+.step-icon svg{width:10px;height:10px}
+.step-body{flex:1;min-width:0}
+.step-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.step-fn{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+.step-state{display:flex;align-items:center;gap:7px;margin-top:4px;flex-wrap:wrap}
+.step-badge{font-size:9px;padding:2px 7px;border-radius:8px;font-family:'DM Mono',monospace;font-weight:500}
+.sb-done{background:var(--green-bg);color:var(--green)}
+.sb-active{background:var(--blue-bg);color:var(--blue)}
+.sb-blocked{background:var(--red-bg);color:var(--red)}
+.sb-waiting{background:var(--amber-bg);color:var(--amber)}
+.sb-pending{background:var(--bg3);color:var(--text3)}
+.sb-skipped{background:var(--bg3);color:var(--text3)}
+.step-note{font-size:10px;color:var(--text3);margin-top:3px}
+.step-ts{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:auto;flex-shrink:0;padding-top:2px}
+.step-action{margin-top:6px}
+.step-btn{font-size:9px;padding:3px 9px;border-radius:4px;border:1px solid var(--border-med);background:transparent;color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
+.step-btn:hover{background:var(--bg3);color:var(--text)}
+.step-btn.g{border-color:rgba(74,222,128,0.3);color:var(--green)}
+.step-btn.g:hover{background:var(--green-bg)}
+
+/* CONVERSATIONS TAB */
+.conv-filter{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
+.conv-filter-btn{font-size:10px;padding:4px 10px;border-radius:10px;cursor:pointer;border:1px solid var(--border-med);color:var(--text3);background:transparent;font-family:'DM Mono',monospace;transition:all .15s}
+.conv-filter-btn:hover{color:var(--text2);border-color:var(--border-med)}
+.conv-filter-btn.on{background:var(--bg3);color:var(--text);border-color:var(--border-med)}
+
+.conv-item{background:var(--bg3);border-radius:8px;margin-bottom:8px;overflow:hidden;border:1px solid var(--border);transition:border-color .15s}
+.conv-item:hover{border-color:var(--border-med)}
+.conv-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer}
+.conv-type-badge{font-size:9px;padding:2px 8px;border-radius:8px;font-family:'DM Mono',monospace;font-weight:500;flex-shrink:0}
+.ctb-wa{background:rgba(37,211,102,0.15);color:#25d366}
+.ctb-email{background:var(--blue-bg);color:var(--blue)}
+.ctb-call{background:var(--purple-bg);color:var(--purple)}
+.conv-title{font-size:12px;font-weight:500;color:var(--text);flex:1}
+.conv-meta{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0}
+.conv-body{display:none;padding:0 14px 14px;border-top:1px solid var(--border)}
+.conv-item.open .conv-body{display:block}
+.conv-chevron{width:11px;height:11px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.conv-item.open .conv-chevron{transform:rotate(180deg)}
+.conv-step-tag{font-size:9px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:8px;padding-top:10px}
+
+.msg-thread{margin-bottom:12px}
+.msg-row{display:flex;gap:8px;margin-bottom:6px}
+.msg-row.out{flex-direction:row-reverse}
+.msg-bubble{max-width:85%;padding:8px 11px;border-radius:8px;font-size:11px;line-height:1.6}
+.msg-row.in .msg-bubble{background:var(--bg4);color:var(--text2);border-bottom-left-radius:2px}
+.msg-row.out .msg-bubble{background:rgba(240,230,200,0.1);color:var(--accent);border-bottom-right-radius:2px}
+.msg-sender{font-size:9px;font-family:'DM Mono',monospace;margin-bottom:2px}
+.msg-row.in .msg-sender{color:var(--text3)}
+.msg-row.out .msg-sender{color:var(--text3);text-align:right}
+.msg-time{font-size:8px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px}
+.msg-row.out .msg-time{text-align:right}
+
+.call-record{background:var(--bg4);border-radius:6px;padding:12px 14px;margin-bottom:10px}
+.call-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.call-icon{width:30px;height:30px;border-radius:50%;background:var(--purple-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.call-icon svg{width:14px;height:14px;color:var(--purple)}
+.call-info{flex:1}
+.call-title{font-size:12px;font-weight:500;color:var(--text)}
+.call-meta{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px}
+.call-play{padding:5px 12px;border-radius:4px;background:var(--purple-bg);border:1px solid rgba(167,139,250,0.3);color:var(--purple);font-size:9px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s}
+.call-play:hover{background:rgba(167,139,250,0.2)}
+.call-summary{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.call-summary-label{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.call-summary-text{font-size:11px;color:var(--text2);line-height:1.6}
+.call-tags{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap}
+.call-tag{font-size:9px;padding:2px 7px;border-radius:8px;font-family:'DM Mono',monospace;background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+
+.email-record{background:var(--bg4);border-radius:6px;padding:12px 14px;margin-bottom:8px}
+.email-from{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:4px}
+.email-subject{font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px}
+.email-body{font-size:11px;color:var(--text2);line-height:1.6}
+.email-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+
+.summary-card{background:var(--amber-bg);border:1px solid rgba(251,191,36,0.2);border-radius:6px;padding:10px 12px;margin-bottom:10px}
+.summary-card-label{font-size:9px;font-family:'DM Mono',monospace;color:var(--amber);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.summary-card-text{font-size:11px;color:var(--text);line-height:1.6}
+
+/* MODALS */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border-med);border-radius:12px;width:460px;max-height:82vh;overflow-y:auto;padding:22px;animation:mi .18s ease}
+@keyframes mi{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600}
+.modal-close{width:26px;height:26px;border-radius:5px;background:var(--bg3);border:none;color:var(--text2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.field-group{margin-bottom:14px}
+.field-label{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.field-val{font-size:12px;color:var(--text2);line-height:1.6}
+.field-val.mono{font-family:'DM Mono',monospace;font-size:11px}
+.modal-input{width:100%;background:var(--bg3);border:1px solid var(--border-med);border-radius:5px;padding:8px 11px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+.modal-input:focus{border-color:rgba(255,255,255,0.2)}
+.modal-textarea{width:100%;background:var(--bg3);border:1px solid var(--border-med);border-radius:5px;padding:8px 11px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:70px}
+.modal-footer{display:flex;gap:7px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.modal-btn{padding:8px 16px;border-radius:5px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.modal-btn.primary{background:var(--accent);color:#111;border-color:var(--accent);font-weight:500}
+.modal-btn.primary:hover{opacity:.9}
+.modal-btn.sec{background:transparent;color:var(--text2);border-color:var(--border-med)}
+.modal-btn.sec:hover{background:var(--bg3);color:var(--text)}
+.modal-btn.danger{background:var(--red-bg);color:var(--red);border-color:rgba(248,113,113,0.3)}
+
+.dl{border:none;border-top:1px solid var(--border);margin:12px 0}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--border-med);border-radius:7px;padding:10px 14px;font-size:11px;color:var(--text);font-family:'DM Mono',monospace;z-index:200;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-name">BlinkofAI</div>
+    <div class="brand-sub">AM Console</div>
+  </div>
+  <div class="nav">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
+      Pending
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-label">Projects</div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+      All projects
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L10 6h4l-3.5 2.5 1.5 4.5L8 10.5 4 13l1.5-4.5L2 6h4z"/></svg>
+      Flagged
+      <span class="nav-badge a">2</span>
+    </div>
+    <div class="nav-label">Clients</div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2-5 5-5s5 2 5 5"/><circle cx="12" cy="6" r="2"/><path d="M12 10c2 0 3 1 3 3"/></svg>
+      Clients
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="am-pill">
+      <div class="am-avatar">RS</div>
+      <div><div class="am-name">Ravi S.</div><div class="am-role">Account Manager</div></div>
+      <div class="status-dot"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Dashboard</div>
+      <div class="page-date" id="today-date"></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-ghost">↻ Refresh</button>
+      <button class="btn-ghost">↓ Export</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+
+      <!-- STATS -->
+      <div class="stat-strip">
+        <div class="stat-card"><div class="stat-label">Active</div><div class="stat-val">11</div><div class="stat-delta du">↑ 2 this week</div></div>
+        <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val" style="color:var(--amber)">3</div><div class="stat-delta dw">Avg 4.2h wait</div></div>
+        <div class="stat-card"><div class="stat-label">Flags</div><div class="stat-val" style="color:var(--red)">2</div><div class="stat-delta dr">1 critical</div></div>
+        <div class="stat-card"><div class="stat-label">Pipeline</div><div class="stat-val">₹8.4L</div><div class="stat-delta du">Active briefs</div></div>
+      </div>
+
+      <!-- FLAGS -->
+      <div class="flags-strip">
+        <div class="flags-title">Flags</div>
+        <div class="flag-row r" onclick="openModal('escalation')">
+          <div class="flag-dot r"></div>
+          <div><div class="flag-text">Malabar Gold requesting a call — brief misalignment</div><div class="flag-sub">MAL-002 · F11 Escalation · 2h ago</div></div>
+        </div>
+        <div class="flag-row a" onclick="openModal('revision')">
+          <div class="flag-dot a"></div>
+          <div><div class="flag-text">SugarCraft — 1 revision round remaining</div><div class="flag-sub">SUG-005 · F09 Revision tracking · 45m ago</div></div>
+        </div>
+      </div>
+
+      <!-- CLIENTS -->
+      <div class="section-hd">
+        <div class="section-title">Clients & projects</div>
+        <div class="section-ct">5 clients</div>
+      </div>
+
+      <div class="client-block open" id="cl-hdfc">
+        <div class="client-header" onclick="toggleClient('hdfc')">
+          <div class="client-avatar av-b">HD</div>
+          <div><div class="client-name">HDFC MF</div><div class="client-type">AMC · Retainer</div></div>
+          <div class="client-meta"><span class="hp hp-g">88</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg></div>
+        </div>
+        <div class="proj-list">
+          <div class="proj-row" id="row-hdfc-001" onclick="selectProject('hdfc-001')"><div class="proj-info"><div class="proj-name">Diwali Campaign Reels</div><div class="proj-id">BAI-2025-HDFC-001</div></div><span class="sp sp-prod">Production</span></div>
+          <div class="proj-row" id="row-hdfc-002" onclick="selectProject('hdfc-002')"><div class="proj-info"><div class="proj-name">SIP Awareness Statics</div><div class="proj-id">BAI-2025-HDFC-002</div></div><span class="sp sp-rev">Review</span></div>
+          <div class="proj-row" id="row-hdfc-003" onclick="selectProject('hdfc-003')"><div class="proj-info"><div class="proj-name">Brand Film 60s</div><div class="proj-id">BAI-2025-HDFC-003</div></div><span class="sp sp-intake">Intake</span></div>
+        </div>
+      </div>
+
+      <div class="client-block" id="cl-malabar">
+        <div class="client-header" onclick="toggleClient('malabar')">
+          <div class="client-avatar av-a">MG</div>
+          <div><div class="client-name">Malabar Gold</div><div class="client-type">Jewellery · PAYG</div></div>
+          <div class="client-meta"><span class="hp hp-r">41</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg></div>
+        </div>
+        <div class="proj-list">
+          <div class="proj-row" id="row-malabar-001" onclick="selectProject('malabar-001')"><div class="proj-info"><div class="proj-name">Akshaya Tritiya Video</div><div class="proj-id">BAI-2025-MAL-001</div></div><span class="sp sp-prod">Production</span></div>
+          <div class="proj-row" id="row-malabar-002" onclick="selectProject('malabar-002')"><div class="proj-info"><div class="proj-name">Instagram Reels Series</div><div class="proj-id">BAI-2025-MAL-002</div></div><span class="sp sp-rev">Review</span></div>
+        </div>
+      </div>
+
+      <div class="client-block" id="cl-sugar">
+        <div class="client-header" onclick="toggleClient('sugar')">
+          <div class="client-avatar av-g">SC</div>
+          <div><div class="client-name">SugarCraft</div><div class="client-type">D2C · PAYG</div></div>
+          <div class="client-meta"><span class="hp hp-a">62</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg></div>
+        </div>
+        <div class="proj-list">
+          <div class="proj-row" id="row-sugar-004" onclick="selectProject('sugar-004')"><div class="proj-info"><div class="proj-name">Meta Ads Performance</div><div class="proj-id">BAI-2025-SUG-004</div></div><span class="sp sp-prod">Production</span></div>
+          <div class="proj-row" id="row-sugar-005" onclick="selectProject('sugar-005')"><div class="proj-info"><div class="proj-name">Brand Refresh Reels</div><div class="proj-id">BAI-2025-SUG-005</div></div><span class="sp sp-prod">Production</span></div>
+        </div>
+      </div>
+
+      <div class="client-block" id="cl-taneira">
+        <div class="client-header" onclick="toggleClient('taneira')">
+          <div class="client-avatar av-p">TN</div>
+          <div><div class="client-name">Taneira Sarees</div><div class="client-type">Jewellery · Retainer</div></div>
+          <div class="client-meta"><span class="hp hp-g">91</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg></div>
+        </div>
+        <div class="proj-list">
+          <div class="proj-row" id="row-taneira-001" onclick="selectProject('taneira-001')"><div class="proj-info"><div class="proj-name">Summer Lookbook Video</div><div class="proj-id">BAI-2025-TAN-001</div></div><span class="sp sp-ob">Onboarding</span></div>
+          <div class="proj-row" id="row-taneira-002" onclick="selectProject('taneira-002')"><div class="proj-info"><div class="proj-name">Wedding Season Statics</div><div class="proj-id">BAI-2025-TAN-002</div></div><span class="sp sp-del">Delivered</span></div>
+        </div>
+      </div>
+
+      <div class="client-block" id="cl-lens">
+        <div class="client-header" onclick="toggleClient('lens')">
+          <div class="client-avatar av-t">LK</div>
+          <div><div class="client-name">Lenskart</div><div class="client-type">D2C · PAYG</div></div>
+          <div class="client-meta"><span class="hp hp-g">79</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg></div>
+        </div>
+        <div class="proj-list">
+          <div class="proj-row" id="row-lens-001" onclick="selectProject('lens-001')"><div class="proj-info"><div class="proj-name">Performance Video Set</div><div class="proj-id">BAI-2025-LEN-001</div></div><span class="sp sp-eval">Eval</span></div>
+          <div class="proj-row" id="row-lens-002" onclick="selectProject('lens-002')"><div class="proj-info"><div class="proj-name">Festival Statics 10x</div><div class="proj-id">BAI-2025-LEN-002</div></div><span class="sp sp-prod">Production</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel" id="right-panel">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text3)"><rect x="2" y="2" width="14" height="14" rx="3"/><path d="M6 9h6M9 6v6"/></svg>
+        </div>
+        <div style="font-size:12px">Select a project</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace">Click any project on the left</div>
+      </div>
+
+      <div id="project-detail" style="display:none;display:flex;flex-direction:column;height:100%">
+        <div class="proj-detail-header">
+          <div class="pdh-left">
+            <div class="pdh-title" id="pd-title"></div>
+            <div class="pdh-meta">
+              <span class="pdh-id" id="pd-id"></span>
+              <span class="sp" id="pd-status-badge"></span>
+              <span class="hp" id="pd-health-badge"></span>
+            </div>
+          </div>
+          <div class="pdh-right" id="pd-actions"></div>
+        </div>
+
+        <div class="pd-tabs">
+          <div class="pd-tab on" onclick="switchPdTab('overview',this)">Overview</div>
+          <div class="pd-tab" onclick="switchPdTab('workflow',this)">Workflow</div>
+          <div class="pd-tab" onclick="switchPdTab('conversations',this)">Conversations</div>
+        </div>
+
+        <div class="pd-panels">
+          <div class="pd-panel on" id="pd-overview"></div>
+          <div class="pd-panel" id="pd-workflow"></div>
+          <div class="pd-panel" id="pd-conversations"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="modal-note">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add note</div><button class="modal-close" onclick="closeModal('note')">✕</button></div>
+    <div class="field-group"><div class="field-label">Project</div><div class="field-val mono" id="note-proj"></div></div>
+    <div class="field-group"><div class="field-label">Note</div><textarea class="modal-textarea" placeholder="Add context, instructions, or observations..."></textarea></div>
+    <div class="field-group"><div class="field-label">Visibility</div><select class="modal-input"><option>Internal only</option><option>Flag for agent</option><option>Urgent</option></select></div>
+    <div class="modal-footer"><button class="modal-btn primary" onclick="closeModal('note');showToast('✓ Note saved')">Save note</button><button class="modal-btn sec" onclick="closeModal('note')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-approve">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Approve project</div><button class="modal-close" onclick="closeModal('approve')">✕</button></div>
+    <div class="field-group"><div class="field-label">Project</div><div class="field-val mono" id="approve-proj"></div></div>
+    <div class="field-group"><div class="field-label">Agent-estimated price (₹)</div><div class="field-val mono" id="approve-est"></div></div>
+    <div class="field-group"><div class="field-label">Confirm or override price (₹)</div><input class="modal-input" type="number" id="approve-price"></div>
+    <div class="field-group"><div class="field-label">AM note</div><textarea class="modal-textarea" placeholder="Any instructions..."></textarea></div>
+    <div class="modal-footer"><button class="modal-btn primary" onclick="closeModal('approve');showToast('✓ Project approved · Agreement being drafted')">Confirm approval</button><button class="modal-btn sec" onclick="closeModal('approve')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-signoff">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Mark sign-off received</div><button class="modal-close" onclick="closeModal('signoff')">✕</button></div>
+    <div class="field-group"><div class="field-label">Stage being locked</div><select class="modal-input"><option>Concept</option><option>Script</option><option>Storyboard</option><option>Rough cut</option><option>Final edit</option></select></div>
+    <div class="field-group"><div class="field-label">How received</div><select class="modal-input"><option>WhatsApp (verbal)</option><option>Email confirmation</option><option>Formal sign-off form</option></select></div>
+    <div class="field-group"><div class="field-label">Signed by</div><input class="modal-input" type="text" placeholder="Client POC name"></div>
+    <div class="modal-footer"><button class="modal-btn primary" onclick="closeModal('signoff');showToast('✓ Stage locked · Sign-off recorded')">Lock stage</button><button class="modal-btn sec" onclick="closeModal('signoff')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-escalation">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Escalation — Malabar Gold</div><button class="modal-close" onclick="closeModal('escalation')">✕</button></div>
+    <div class="field-group"><div class="field-label">Agent classification</div><div class="field-val">Brief misalignment — client expects different deliverable format</div></div>
+    <div class="field-group"><div class="field-label">Sentiment</div><div class="field-val" style="color:var(--red)">Frustrated · 3 follow-up messages in 2h</div></div>
+    <div class="field-group"><div class="field-label">Agent recommendation</div><div class="field-val">Resolve async — share brief_final.txt to realign before committing to call</div></div>
+    <div class="dl"></div>
+    <div class="field-group"><div class="field-label">AM decision</div><select class="modal-input"><option>Resolve async — send clarification</option><option>Schedule call</option><option>Decline call</option></select></div>
+    <div class="field-group"><div class="field-label">Note</div><textarea class="modal-textarea" placeholder="Instructions..."></textarea></div>
+    <div class="modal-footer"><button class="modal-btn primary" onclick="closeModal('escalation');showToast('✓ Escalation handled')">Confirm decision</button><button class="modal-btn sec" onclick="closeModal('escalation')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-revision">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Revision warning — SugarCraft</div><button class="modal-close" onclick="closeModal('revision')">✕</button></div>
+    <div class="field-group"><div class="field-label">Project</div><div class="field-val mono">BAI-2025-SUG-005 · Brand Refresh Reels</div></div>
+    <div class="field-group"><div class="field-label">Revision status</div><div class="field-val" style="color:var(--amber)">2 of 3 rounds used · 1 remaining</div></div>
+    <div class="field-group"><div class="field-label">Required action</div><div class="field-val">Send automated warning to client that 1 revision round remains before change order pricing applies.</div></div>
+    <div class="modal-footer"><button class="modal-btn primary" onclick="closeModal('revision');showToast('✓ Warning sent to SugarCraft')">Send warning now</button><button class="modal-btn sec" onclick="closeModal('revision')">Dismiss</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const projects = {
+  'hdfc-001': {
+    id:'BAI-2025-HDFC-001', name:'Diwali Campaign Reels', client:'HDFC Mutual Fund',
+    status:'In production', statusClass:'sp-prod', health:88, healthClass:'hp-g',
+    price:'₹75,000', completeness:100, revisions:'1/3', assets:true,
+    deadline:'28 Apr', deadlineClass:'soon',
+    brief_raw:'Hi team, we need 3 reels for Diwali — 15 seconds each. Should feel festive, gold palette. Platform: Instagram and YouTube Shorts. We have the script ready.',
+    brief_structured:'Project type: Script to Video. Deliverables: 3x reels, 15s each. Platform: Instagram Reels, YouTube Shorts. Tone: Festive, aspirational. Brand colour: Gold palette. Script: Provided. Deadline: 28 Apr.',
+    missing:[],
+    workflow:[
+      {phase:'Conversion', steps:[
+        {fn:'F01',name:'Brief intake & structuring',status:'done',ts:'12 Apr · 09:14',note:'Brief classified: Script to Video. Completeness 100%.'},
+        {fn:'F02',name:'Project evaluation & pricing',status:'done',ts:'12 Apr · 09:16',note:'Fit score 94. Price ₹75,000. AM approved same day.'},
+        {fn:'F03',name:'Service agreement',status:'done',ts:'12 Apr · 14:30',note:'PAYG comprehensive agreement sent and signed.'},
+      ]},
+      {phase:'Onboarding', steps:[
+        {fn:'F04',name:'Asset collection',status:'done',ts:'13 Apr · 10:00',note:'Brand kit, script, and references received. All assets complete.'},
+      ]},
+      {phase:'Production', steps:[
+        {fn:'F05',name:'Milestone communication',status:'active',ts:'Ongoing',note:'Last update sent 20 Apr. Next: Rough cut ready 25 Apr.'},
+        {fn:'F06',name:'Approval & sign-off',status:'waiting',ts:'Pending',note:'Rough cut sign-off pending. Request sent 22 Apr.',action:'signoff'},
+      ]},
+      {phase:'Feedback & Revisions', steps:[
+        {fn:'F07',name:'Tactical feedback processing',status:'done',ts:'19 Apr',note:'1 round of feedback received. All in-scope. Implemented.'},
+        {fn:'F08',name:'Revision round tracking',status:'active',ts:'Ongoing',note:'1 of 3 rounds used. 2 remaining.'},
+        {fn:'F09',name:'Strategic feedback triage',status:'pending',ts:'—',note:'No strategic feedback received.'},
+      ]},
+      {phase:'Retention & Growth', steps:[
+        {fn:'F10',name:'Escalation triage',status:'pending',ts:'—',note:'No escalation signals.'},
+        {fn:'F11',name:'Upsell identification',status:'pending',ts:'—',note:'Scheduled post-delivery.'},
+        {fn:'F12',name:'Relationship health scoring',status:'active',ts:'Daily',note:'Health: 88. Trend: Stable.'},
+        {fn:'F13',name:'Conversation intelligence',status:'active',ts:'Daily',note:'4 conversations indexed.'},
+      ]},
+    ],
+    conversations:[
+      {type:'wa', title:'Brief received + gap questions', date:'12 Apr, 09:12', step:'F01 Brief intake',
+        messages:[
+          {dir:'in',sender:'Priya (HDFC)',time:'09:12',text:'Hi team, we need 3 reels for Diwali — 15 seconds each. Should feel festive, gold palette. Instagram and YouTube Shorts. Script is ready, will share shortly.'},
+          {dir:'out',sender:'BlinkofAI AM',time:'09:15',text:'Hi Priya, thank you for the brief! We\'ve reviewed it — looks great. Could you share the script when ready? Also, do you have any reference videos for the visual style you\'re envisioning?'},
+          {dir:'in',sender:'Priya (HDFC)',time:'09:44',text:'Script attached. References: [link1], [link2]. Both are from last year\'s Diwali ads we liked.'},
+          {dir:'out',sender:'BlinkofAI AM',time:'09:46',text:'Perfect, received everything. Brief is complete — we\'ll share the evaluation and pricing shortly.'},
+        ]
+      },
+      {type:'email', title:'Service agreement sent', date:'12 Apr, 14:28', step:'F03 Agreement',
+        subject:'Project Agreement — Diwali Campaign Reels · BAI-2025-HDFC-001',
+        from:'am@blinkofai.com → priya@hdfcmf.com',
+        body:'Hi Priya,\n\nPlease find attached the service agreement for your Diwali Campaign Reels project. Key details:\n\n• Deliverables: 3x reels, 15s each, Instagram + YouTube Shorts\n• Timeline: Delivery by 28 Apr 2025\n• Price: ₹75,000\n• Revision rounds: 3\n\nKindly sign and return at your earliest convenience so we can begin production.\n\nBest,\nBlinkofAI AM'
+      },
+      {type:'call', title:'Concept review call', date:'16 Apr, 15:00', step:'F06 Sign-off',
+        duration:'18 min', participants:'Priya Sharma (HDFC), Ravi S. (BlinkofAI)',
+        file:'call_16apr_concept_review.mp3',
+        summary:'Client reviewed the concept deck. Approved visual direction — gold + dark background treatment. Requested one change: add a subtle sparkle animation on the product shots. Agreed this is within scope. No changes to timeline. Priya mentioned they may need a similar project for New Year — flagged for upsell.',
+        tags:['concept approved','sparkle animation requested','upsell signal · new year campaign']
+      },
+      {type:'wa', title:'Feedback round 1', date:'19 Apr, 11:30', step:'F07 Feedback',
+        messages:[
+          {dir:'in',sender:'Priya (HDFC)',time:'11:30',text:'Hi, we reviewed the rough cut. Looks great overall! Two things: 1) The music feels a bit too slow in the second half. Can we pick up the pace? 2) The end card needs the new logo version — I\'ll send it.'},
+          {dir:'out',sender:'BlinkofAI AM',time:'11:35',text:'Hi Priya, noted! Both changes are in scope. Music pacing and logo update will be done in the next revision. Expect updated cut by 21 Apr EOD.'},
+          {dir:'in',sender:'Priya (HDFC)',time:'11:36',text:'Perfect, thanks!'},
+        ]
+      },
+    ]
+  },
+  'malabar-002': {
+    id:'BAI-2025-MAL-002', name:'Instagram Reels Series', client:'Malabar Gold',
+    status:'Review', statusClass:'sp-rev', health:41, healthClass:'hp-r',
+    price:'₹42,000', completeness:100, revisions:'0/3', assets:true,
+    deadline:'30 Apr', deadlineClass:'soon',
+    brief_raw:'We want 5 reels showing our new jewellery collection. Lifestyle feel. Young audience. Music TBD.',
+    brief_structured:'Project type: VO to Video. Deliverables: 5x reels, duration TBD. Platform: Instagram. Tone: Lifestyle, aspirational. Audience: Young adults 22-35. Music: TBD. References: Not yet provided.',
+    missing:['Music direction not confirmed','Reference videos not provided','Exact reel duration not specified'],
+    workflow:[
+      {phase:'Conversion', steps:[
+        {fn:'F01',name:'Brief intake & structuring',status:'done',ts:'5 Apr',note:'Brief classified: VO to Video. Completeness 68% at intake. Gap questions sent.'},
+        {fn:'F02',name:'Project evaluation & pricing',status:'done',ts:'6 Apr',note:'Fit score 88. Price ₹42,000. AM approved.'},
+        {fn:'F03',name:'Service agreement',status:'done',ts:'6 Apr',note:'PAYG comprehensive agreement signed.'},
+      ]},
+      {phase:'Onboarding', steps:[
+        {fn:'F04',name:'Asset collection',status:'done',ts:'8 Apr',note:'Jewellery footage and brand kit received. Music still TBD — client chose to proceed.'},
+      ]},
+      {phase:'Production', steps:[
+        {fn:'F05',name:'Milestone communication',status:'active',ts:'Ongoing',note:'Last update sent 18 Apr. Rough cuts ready for review.'},
+        {fn:'F06',name:'Approval & sign-off',status:'waiting',ts:'Since 20 Apr',note:'Sign-off request sent 20 Apr. No response yet. 2 reminders sent.',action:'signoff'},
+      ]},
+      {phase:'Feedback & Revisions', steps:[
+        {fn:'F07',name:'Tactical feedback processing',status:'pending',ts:'—',note:'Awaiting sign-off before feedback round begins.'},
+        {fn:'F08',name:'Revision round tracking',status:'pending',ts:'—',note:'0 of 3 rounds used.'},
+        {fn:'F09',name:'Strategic feedback triage',status:'pending',ts:'—',note:''},
+      ]},
+      {phase:'Retention & Growth', steps:[
+        {fn:'F10',name:'Escalation triage',status:'blocked',ts:'2h ago',note:'Client sent 3 escalation messages requesting a call. AM decision required.',action:'escalation'},
+        {fn:'F11',name:'Upsell identification',status:'pending',ts:'—',note:''},
+        {fn:'F12',name:'Relationship health scoring',status:'active',ts:'Daily',note:'Health: 41. Trend: Declining. Escalation flag raised.'},
+        {fn:'F13',name:'Conversation intelligence',status:'active',ts:'Daily',note:'3 conversations indexed. Sentiment: Frustrated.'},
+      ]},
+    ],
+    conversations:[
+      {type:'wa', title:'Brief + initial gap questions', date:'5 Apr, 10:20', step:'F01 Brief intake',
+        messages:[
+          {dir:'in',sender:'Anish (Malabar)',time:'10:20',text:'Hi, we need 5 reels for our new collection launch. Lifestyle feel. Young crowd. Music TBD.'},
+          {dir:'out',sender:'BlinkofAI AM',time:'10:25',text:'Hi Anish, thanks for reaching out! Quick questions to complete the brief: 1) What duration are you thinking for each reel? 2) Can you share any reference videos for the lifestyle look? 3) Is there a specific launch date driving the deadline?'},
+          {dir:'in',sender:'Anish (Malabar)',time:'11:05',text:'Around 20-25 seconds each. References — just look at how Tanishq does it. Deadline is end of April ideally.'},
+        ]
+      },
+      {type:'call', title:'Brief alignment call', date:'6 Apr, 12:00', step:'F01 Brief intake',
+        duration:'24 min', participants:'Anish Kumar (Malabar Gold), Ravi S. (BlinkofAI)',
+        file:'call_6apr_brief_alignment.mp3',
+        summary:'Clarified deliverables: 5 reels, 20-25s each, Instagram. Anish wants a "high-end editorial" look — not typical product ads. Discussed music: they want something instrumental, modern. We offered 3 pre-licensed tracks as options. Anish said he\'d confirm within 2 days. Deadline confirmed as 30 Apr. Brief now complete.',
+        tags:['brief finalised','music to be confirmed','editorial visual style','30 Apr deadline locked']
+      },
+      {type:'wa', title:'Escalation — client requesting call', date:'23 Apr, 09:15', step:'F10 Escalation',
+        messages:[
+          {dir:'in',sender:'Anish (Malabar)',time:'09:15',text:'Hi, I sent the sign-off request 3 days ago and haven\'t heard back on next steps. Can we get on a call today?'},
+          {dir:'in',sender:'Anish (Malabar)',time:'11:30',text:'Following up — really need to discuss the direction before we proceed.'},
+          {dir:'in',sender:'Anish (Malabar)',time:'14:00',text:'Is everything okay on your end? Getting a bit concerned.'},
+        ]
+      },
+    ]
+  },
+  'hdfc-003': {
+    id:'BAI-2025-HDFC-003', name:'Brand Film 60s', client:'HDFC Mutual Fund',
+    status:'Brief intake', statusClass:'sp-intake', health:88, healthClass:'hp-g',
+    price:'Pending (est. ₹1,20,000)', completeness:74, revisions:'0/3', assets:false,
+    deadline:'TBD', deadlineClass:'',
+    brief_raw:'We want a 60 second brand film for YouTube and possibly OTT. Target is young urban investors. We have a partial script. Need your thoughts on approach.',
+    brief_structured:'Project type: Script to Video. Deliverables: 1x brand film, 60s. Platform: YouTube (confirmed), OTT (TBD). Audience: Young urban investors 25-35. Tone: Aspirational, trustworthy. Script: Partial. Missing: OTT spec confirmation, final deadline, complete script.',
+    missing:['OTT platform not confirmed — affects spec and deliverable format','Complete script not yet provided','Final deadline not specified'],
+    workflow:[
+      {phase:'Conversion', steps:[
+        {fn:'F01',name:'Brief intake & structuring',status:'active',ts:'23 Apr · 08:30',note:'Brief classified: Script to Video. Completeness 74%. Gap questions sent — awaiting client response.'},
+        {fn:'F02',name:'Project evaluation & pricing',status:'waiting',ts:'Pending AM',note:'Fit score 82. Agent estimated ₹1,20,000. Awaiting AM approval.',action:'approve'},
+        {fn:'F03',name:'Service agreement',status:'pending',ts:'—',note:'Blocked on evaluation approval.'},
+      ]},
+      {phase:'Onboarding', steps:[
+        {fn:'F04',name:'Asset collection',status:'pending',ts:'—',note:'Not started.'},
+      ]},
+      {phase:'Production', steps:[
+        {fn:'F05',name:'Milestone communication',status:'pending',ts:'—',note:''},
+        {fn:'F06',name:'Approval & sign-off',status:'pending',ts:'—',note:''},
+      ]},
+      {phase:'Feedback & Revisions', steps:[
+        {fn:'F07',name:'Tactical feedback processing',status:'pending',ts:'—',note:''},
+        {fn:'F08',name:'Revision round tracking',status:'pending',ts:'—',note:''},
+        {fn:'F09',name:'Strategic feedback triage',status:'pending',ts:'—',note:''},
+      ]},
+      {phase:'Retention & Growth', steps:[
+        {fn:'F10',name:'Escalation triage',status:'pending',ts:'—',note:''},
+        {fn:'F11',name:'Upsell identification',status:'pending',ts:'—',note:''},
+        {fn:'F12',name:'Relationship health scoring',status:'pending',ts:'—',note:''},
+        {fn:'F13',name:'Conversation intelligence',status:'active',ts:'Today',note:'1 conversation indexed.'},
+      ]},
+    ],
+    conversations:[
+      {type:'wa', title:'Brief received — gap questions sent', date:'23 Apr, 08:30', step:'F01 Brief intake',
+        messages:[
+          {dir:'in',sender:'Priya (HDFC)',time:'08:28',text:'Hi! New project — we want a 60 second brand film. Target: young investors. YouTube and maybe OTT. We have a partial script. Would love your thoughts.'},
+          {dir:'out',sender:'BlinkofAI AM',time:'08:32',text:'Hi Priya, exciting! A few things to nail down: 1) Can you confirm if OTT is definite or exploratory? It changes the spec significantly. 2) Can you share the partial script so we can assess scope? 3) Any deadline in mind?'},
+        ]
+      },
+    ]
+  }
+};
+
+let currentProject = null;
+
+function toggleClient(id) {
+  document.getElementById('cl-'+id).classList.toggle('open');
+}
+
+function selectProject(id) {
+  document.querySelectorAll('.proj-row').forEach(r => r.classList.remove('selected'));
+  const row = document.getElementById('row-'+id);
+  if(row) row.classList.add('selected');
+  currentProject = id;
+  renderProject(id);
+}
+
+function renderProject(id) {
+  const p = projects[id];
+  if(!p) return;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('project-detail').style.display = 'flex';
+
+  document.getElementById('pd-title').textContent = p.name;
+  document.getElementById('pd-id').textContent = p.id + ' · ' + p.client;
+
+  const sb = document.getElementById('pd-status-badge');
+  sb.textContent = p.status;
+  sb.className = 'sp ' + p.statusClass;
+
+  const hb = document.getElementById('pd-health-badge');
+  hb.textContent = 'Health ' + p.health;
+  hb.className = 'hp ' + p.healthClass;
+
+  const acts = document.getElementById('pd-actions');
+  acts.innerHTML = '';
+  if(p.status === 'Brief intake' || p.status === 'Evaluation') {
+    acts.innerHTML += `<button class="pd-btn ap" onclick="openApprove('${id}')">Approve ₹</button>`;
+    acts.innerHTML += `<button class="pd-btn rj">Reject</button>`;
+  }
+  if(p.status === 'Review') {
+    acts.innerHTML += `<button class="pd-btn" onclick="openSignoff()">Mark sign-off</button>`;
+  }
+  acts.innerHTML += `<button class="pd-btn" onclick="openNote('${id}')">+ Note</button>`;
+
+  renderOverview(p);
+  renderWorkflow(p);
+  renderConversations(p);
+}
+
+function renderOverview(p) {
+  const el = document.getElementById('pd-overview');
+  const cColor = p.completeness >= 80 ? 'var(--green)' : p.completeness >= 50 ? 'var(--amber)' : 'var(--red)';
+  const hColor = p.health >= 75 ? 'var(--green)' : p.health >= 55 ? 'var(--amber)' : 'var(--red)';
+  const [ru, rt] = p.revisions.split('/');
+
+  el.innerHTML = `
+    <div class="overview-grid">
+      <div class="ov-card"><div class="ov-label">Price</div><div class="ov-val mono" style="color:var(--accent)">${p.price}</div></div>
+      <div class="ov-card"><div class="ov-label">Deadline</div><div class="ov-val mono" style="color:${p.deadlineClass==='soon'?'var(--amber)':p.deadlineClass==='urgent'?'var(--red)':'var(--text)'}">${p.deadline}</div></div>
+      <div class="ov-card"><div class="ov-label">Health</div><div class="ov-val" style="color:${hColor}">${p.health}<span style="font-size:10px;color:var(--text3)">/100</span></div></div>
+      <div class="ov-card"><div class="ov-label">Brief completeness</div><div class="ov-val" style="color:${cColor}">${p.completeness}%</div><div class="completeness-wrap" style="background:var(--bg);height:3px;border-radius:3px;margin-top:6px"><div class="cbar" style="width:${p.completeness}%;background:${cColor}"></div></div></div>
+      <div class="ov-card"><div class="ov-label">Revision rounds</div><div class="ov-val mono">${ru}<span style="color:var(--text3)">/${rt}</span></div><div class="ov-sub">used / contracted</div></div>
+      <div class="ov-card"><div class="ov-label">Assets</div><div class="ov-val" style="color:${p.assets?'var(--green)':'var(--amber)'}">${p.assets?'Complete':'Pending'}</div></div>
+    </div>
+    <div class="brief-block">
+      <div class="brief-label">Brief</div>
+      <div class="brief-tabs">
+        <div class="brief-tab on" onclick="switchBrief(this,'raw','${currentProject}')">Raw</div>
+        <div class="brief-tab" onclick="switchBrief(this,'structured','${currentProject}')">Structured</div>
+        ${p.missing.length?'<div class="brief-tab" onclick="switchBrief(this,\'missing\',\''+currentProject+'\')">Gaps ('+p.missing.length+')</div>':''}
+      </div>
+      <div class="brief-text" id="brief-content">${p.brief_raw}</div>
+    </div>
+  `;
+}
+
+function switchBrief(btn, type, pid) {
+  document.querySelectorAll('.brief-tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  const p = projects[pid];
+  const el = document.getElementById('brief-content');
+  if(type==='raw') el.innerHTML = p.brief_raw;
+  else if(type==='structured') el.innerHTML = p.brief_structured.replace(/\n/g,'<br>');
+  else if(type==='missing') {
+    el.innerHTML = '<div class="missing-fields">' + p.missing.map(m=>`<div class="missing-row"><div class="missing-dot"></div><div class="missing-text">${m}</div></div>`).join('') + '</div>';
+  }
+}
+
+function renderWorkflow(p) {
+  const el = document.getElementById('pd-workflow');
+  const iconMap = {
+    done:`<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--green)"><path d="M2 5l2 2 4-4"/></svg>`,
+    active:`<svg viewBox="0 0 10 10" fill="none" stroke="none"><circle cx="5" cy="5" r="2.5" fill="var(--blue)"/></svg>`,
+    waiting:`<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--amber)"><circle cx="5" cy="5" r="3"/><path d="M5 3v2l1 1"/></svg>`,
+    blocked:`<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--red)"><path d="M2 8L8 2M2 2l6 6"/></svg>`,
+    pending:`<svg viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="2" stroke="currentColor" stroke-width="1" style="color:var(--text3)"/></svg>`,
+    skipped:`<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" style="color:var(--text3)"><path d="M3 5h4"/></svg>`,
+  };
+  const badgeMap = {done:'sb-done',active:'sb-active',waiting:'sb-waiting',blocked:'sb-blocked',pending:'sb-pending',skipped:'sb-skipped'};
+  const labelMap = {done:'Done',active:'In progress',waiting:'Waiting — AM',blocked:'Blocked',pending:'Not started',skipped:'Skipped'};
+
+  let phasesDone = 0, phasesTotal = p.workflow.length;
+  let html = '';
+  p.workflow.forEach(phase => {
+    const total = phase.steps.length;
+    const done = phase.steps.filter(s=>s.status==='done').length;
+    const pct = Math.round(done/total*100);
+    if(pct===100) phasesDone++;
+    const fillColor = pct===100?'var(--green)':pct>0?'var(--blue)':'var(--bg3)';
+    html += `<div class="phase-block">
+      <div class="phase-label">${phase.phase}<div class="phase-progress"><div class="phase-fill" style="width:${pct}%;background:${fillColor}"></div></div><span style="font-size:9px;font-family:'DM Mono',monospace">${done}/${total}</span></div>`;
+    phase.steps.forEach(step => {
+      html += `<div class="step-row">
+        <div class="step-icon ${step.status}">${iconMap[step.status]||''}</div>
+        <div class="step-body">
+          <div class="step-name">${step.name}</div>
+          <div class="step-fn">${step.fn}</div>
+          <div class="step-state">
+            <span class="step-badge ${badgeMap[step.status]||'sb-pending'}">${labelMap[step.status]||step.status}</span>
+            ${step.note?`<span style="font-size:10px;color:var(--text3)">${step.note}</span>`:''}
+          </div>
+          ${step.action==='approve'?`<div class="step-action"><button class="step-btn g" onclick="openApprove('${currentProject}')">Approve evaluation →</button></div>`:''}
+          ${step.action==='signoff'?`<div class="step-action"><button class="step-btn g" onclick="openSignoff()">Mark sign-off received →</button></div>`:''}
+          ${step.action==='escalation'?`<div class="step-action"><button class="step-btn" style="color:var(--red);border-color:rgba(248,113,113,0.3)" onclick="openModal('escalation')">Handle escalation →</button></div>`:''}
+        </div>
+        <div class="step-ts">${step.ts}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderConversations(p) {
+  const el = document.getElementById('pd-conversations');
+  let html = `<div class="conv-filter">
+    <button class="conv-filter-btn on" onclick="filterConv(this,'all')">All</button>
+    <button class="conv-filter-btn" onclick="filterConv(this,'wa')">WhatsApp</button>
+    <button class="conv-filter-btn" onclick="filterConv(this,'email')">Email</button>
+    <button class="conv-filter-btn" onclick="filterConv(this,'call')">Calls</button>
+  </div>`;
+
+  p.conversations.forEach((conv, i) => {
+    const typeMap = {wa:'ctb-wa',email:'ctb-email',call:'ctb-call'};
+    const typeLabel = {wa:'WhatsApp',email:'Email',call:'Call recording'};
+    html += `<div class="conv-item" id="conv-${i}">
+      <div class="conv-head" onclick="toggleConv(${i})">
+        <span class="conv-type-badge ${typeMap[conv.type]}">${typeLabel[conv.type]}</span>
+        <span class="conv-title">${conv.title}</span>
+        <span class="conv-meta">${conv.date}</span>
+        <svg class="conv-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg>
+      </div>
+      <div class="conv-body">
+        <div class="conv-step-tag">Linked to: ${conv.step}</div>`;
+
+    if(conv.type==='wa') {
+      html += `<div class="msg-thread">`;
+      conv.messages.forEach(m => {
+        html += `<div class="msg-row ${m.dir}">
+          <div>
+            <div class="msg-sender">${m.sender}</div>
+            <div class="msg-bubble">${m.text}</div>
+            <div class="msg-time">${m.time}</div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    } else if(conv.type==='email') {
+      html += `<div class="email-record">
+        <div class="email-row"><div class="email-from">${conv.from}</div><div class="conv-meta">${conv.date}</div></div>
+        <div class="email-subject">${conv.subject}</div>
+        <div class="email-body">${conv.body.replace(/\n/g,'<br>')}</div>
+      </div>`;
+    } else if(conv.type==='call') {
+      html += `<div class="call-record">
+        <div class="call-header">
+          <div class="call-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--purple);width:14px;height:14px"><path d="M3 3a1 1 0 011-1h2l1 3-1.5 1.5a9 9 0 004 4L11 9l3 1v2a1 1 0 01-1 1C6 13 3 7 3 3z"/></svg></div>
+          <div class="call-info"><div class="call-title">${conv.title}</div><div class="call-meta">${conv.duration} · ${conv.participants}</div></div>
+          <button class="call-play" onclick="showToast('▶ Playing ${conv.file}')">▶ Play</button>
+        </div>
+        <div class="call-summary">
+          <div class="call-summary-label">Agent summary</div>
+          <div class="call-summary-text">${conv.summary}</div>
+          <div class="call-tags">${conv.tags.map(t=>`<span class="call-tag">${t}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+function toggleConv(i) {
+  document.getElementById('conv-'+i).classList.toggle('open');
+}
+function filterConv(btn, type) {
+  document.querySelectorAll('.conv-filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  showToast(type==='all'?'Showing all conversations':'Filtered: '+type);
+}
+
+function switchPdTab(name, btn) {
+  document.querySelectorAll('.pd-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pd-panel').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('pd-'+name).classList.add('on');
+}
+
+function openModal(id) { document.getElementById('modal-'+id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-'+id).classList.remove('open'); }
+function openNote(id) { document.getElementById('note-proj').textContent = projects[id]?.id||id; openModal('note'); }
+function openApprove(id) {
+  const p = projects[id];
+  document.getElementById('approve-proj').textContent = p?.id||id;
+  document.getElementById('approve-est').textContent = p?.price||'—';
+  document.getElementById('approve-price').value = '';
+  openModal('approve');
+}
+function openSignoff() { openModal('signoff'); }
+
+document.querySelectorAll('.modal-backdrop').forEach(b => b.addEventListener('click', function(e){ if(e.target===this) closeModal(this.id.replace('modal-','')); }));
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+const d=new Date();
+const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+document.getElementById('today-date').textContent=`${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+selectProject('hdfc-001');
+document.getElementById('cl-hdfc').classList.add('open');
+</script>
+</body>
+</html>
