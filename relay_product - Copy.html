@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relay — Product Definition</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0c;
+  --ink2: #4a4845;
+  --ink3: #9a9890;
+  --paper: #faf8f4;
+  --paper2: #f2efe8;
+  --paper3: #e8e4da;
+  --accent: #1a1a1a;
+  --gold: #b8860b;
+  --gold-light: #f5f0e0;
+  --green: #1a4d2e;
+  --green-light: #e8f4ec;
+  --red: #8b1a1a;
+  --red-light: #f5e8e8;
+  --blue: #1a2d4d;
+  --blue-light: #e8edf5;
+  --border: rgba(0,0,0,0.10);
+  --border-med: rgba(0,0,0,0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Geist', sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.serif { font-family: 'Instrument Serif', Georgia, serif; }
+.mono { font-family: 'Geist Mono', monospace; }
+
+/* HEADER */
+.header {
+  padding: 80px 60px 60px;
+  border-bottom: 1px solid var(--border);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.header-eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 20px;
+}
+.header-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(56px, 8vw, 88px);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.header-name em {
+  font-style: italic;
+  color: var(--ink3);
+}
+.header-tagline {
+  font-size: 18px;
+  color: var(--ink2);
+  font-weight: 300;
+  max-width: 520px;
+  line-height: 1.5;
+  margin-bottom: 32px;
+}
+.header-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.meta-pill {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border: 1px solid var(--border-med);
+  border-radius: 20px;
+  color: var(--ink2);
+  background: var(--paper2);
+}
+
+/* MAIN LAYOUT */
+.body-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 60px 80px;
+}
+
+/* SECTION */
+.section {
+  padding: 56px 0;
+  border-bottom: 1px solid var(--border);
+}
+.section:last-child { border-bottom: none; }
+.section-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 28px;
+}
+.section-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+.section-body {
+  font-size: 15px;
+  color: var(--ink2);
+  line-height: 1.75;
+  max-width: 680px;
+}
+
+/* NAME EXPLORATION */
+.name-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 28px;
+}
+.name-card {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 22px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.name-card:hover { border-color: var(--border-med); background: var(--paper); }
+.name-card.selected {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+.name-card.selected .nc-name { color: var(--paper); }
+.name-card.selected .nc-meaning { color: var(--paper3); }
+.name-card.selected .nc-verdict { background: rgba(255,255,255,0.1); color: var(--paper2); }
+.nc-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.nc-meaning {
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.nc-verdict {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.verdict-pick { background: var(--green-light); color: var(--green); }
+.verdict-alt { background: var(--blue-light); color: var(--blue); }
+.verdict-maybe { background: var(--paper3); color: var(--ink2); }
+
+/* POSITIONING */
+.pos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 28px;
+}
+.pos-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 22px;
+  background: var(--paper);
+}
+.pc-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 8px;
+}
+.pc-text {
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.6;
+}
+.pc-text strong { color: var(--ink); font-weight: 500; }
+
+/* FEATURE TABLE */
+.feature-block { margin-top: 32px; }
+.phase-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  margin-top: 28px;
+}
+.phase-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border-med);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink2);
+  flex-shrink: 0;
+}
+.phase-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: 'Geist Mono', monospace;
+}
+.feature-rows {}
+.feature-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 100px;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+.feature-row:last-child { border-bottom: none; }
+.fr-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.fr-desc {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.fr-mode {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  text-align: center;
+  white-space: nowrap;
+}
+.fm-auto { background: var(--green-light); color: var(--green); }
+.fm-gate { background: var(--gold-light); color: var(--gold); }
+.fm-bg { background: var(--paper2); color: var(--ink3); }
+
+/* ADDITIONAL FEATURES */
+.add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+.add-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  background: var(--paper);
+}
+.ac-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ac-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.ac-desc {
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.ac-tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-top: 8px;
+  display: inline-block;
+}
+.tag-mvp { background: var(--green-light); color: var(--green); }
+.tag-v2 { background: var(--blue-light); color: var(--blue); }
+.tag-v3 { background: var(--paper3); color: var(--ink2); }
+
+/* STACK */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+.stack-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  background: var(--paper2);
+}
+.sc-layer {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+.sc-tech {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.sc-desc {
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+
+/* COMP */
+.comp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+.comp-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: var(--paper);
+}
+.cc-what { font-size: 12px; color: var(--ink3); font-family: 'Geist Mono', monospace; margin-bottom: 4px; }
+.cc-name { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+.cc-how { font-size: 12px; color: var(--ink2); line-height: 1.4; }
+
+/* BUILD SEQUENCE */
+.seq-list { margin-top: 24px; }
+.seq-item {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.seq-item:last-child { border-bottom: none; }
+.si-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+  min-width: 24px;
+  padding-top: 2px;
+}
+.si-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+.si-detail { font-size: 12px; color: var(--ink2); line-height: 1.5; }
+.si-tech { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--ink3); margin-top: 4px; }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); }
+
+/* FOOTER */
+.footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  color: var(--ink);
+}
+.footer-meta {
+  font-size: 12px;
+  color: var(--ink3);
+  font-family: 'Geist Mono', monospace;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-eyebrow">Product definition · BlinkofAI · April 2026</div>
+  <div class="header-name">Relay <em>by BlinkofAI</em></div>
+  <div class="header-tagline">The agentic account manager for creative agencies. Every brief, every message, every project — handled with the rigour your clients expect and the speed your team needs.</div>
+  <div class="header-meta">
+    <span class="meta-pill">Category: Agency SaaS</span>
+    <span class="meta-pill">Primary user: Account manager</span>
+    <span class="meta-pill">Channels: WhatsApp · Email · Calls</span>
+    <span class="meta-pill">MVP: 6 clients · 1 AM · 13 steps</span>
+  </div>
+</div>
+
+<div class="body-wrap">
+
+<!-- NAME -->
+<div class="section">
+  <div class="section-label">01 — Name</div>
+  <div class="section-title">Why Relay</div>
+  <div class="section-body">The word earns its keep on multiple registers. In sport, a relay is seamless handoff — one runner to the next, no dropped baton. In communications, a relay is the station that receives and forwards a signal faithfully. In both cases, the message gets through. That is exactly what the product does: it receives what clients send, reasons about it, and relays the right response at the right moment — without the AM having to be the one holding the baton at every step.</div>
+  <div class="name-grid">
+    <div class="name-card selected">
+      <div class="nc-name">Relay</div>
+      <div class="nc-meaning">Handoff in a race. Signal forwarding station. The thing that ensures nothing is dropped between sender and receiver.</div>
+      <span class="nc-verdict verdict-pick">Recommended</span>
+    </div>
+    <div class="name-card">
+      <div class="nc-name">Cadence</div>
+      <div class="nc-meaning">The rhythm and pace of communication. Implies regularity, consistency, and proactive outreach — all core to the product.</div>
+      <span class="nc-verdict verdict-alt">Strong alt</span>
+    </div>
+    <div class="name-card">
+      <div class="nc-name">Brief</div>
+      <div class="nc-meaning">The document that starts every project. Simple, direct, industry-native. Doubles as "be brief" — communicate concisely.</div>
+      <span class="nc-verdict verdict-alt">Strong alt</span>
+    </div>
+    <div class="name-card">
+      <div class="nc-name">Steward</div>
+      <div class="nc-meaning">A steward manages and looks after something on someone else's behalf. Implies care, ownership, and accountability.</div>
+      <span class="nc-verdict verdict-maybe">Consider</span>
+    </div>
+    <div class="name-card">
+      <div class="nc-name">Throughline</div>
+      <div class="nc-meaning">The thread that runs through a project from brief to delivery. Implies narrative continuity and completeness.</div>
+      <span class="nc-verdict verdict-maybe">Consider</span>
+    </div>
+    <div class="name-card">
+      <div class="nc-name">Handoff</div>
+      <div class="nc-meaning">What happens at every workflow gate. Direct, functional, clearly communicates the core mechanic of the AM-agent relationship.</div>
+      <span class="nc-verdict verdict-maybe">Consider</span>
+    </div>
+  </div>
+</div>
+
+<!-- POSITIONING -->
+<div class="section">
+  <div class="section-label">02 — Positioning</div>
+  <div class="section-title">What Relay is — precisely</div>
+  <div class="section-body">The positioning must be specific enough to own, broad enough to sell. Three framings, each for a different conversation.</div>
+  <div class="pos-grid">
+    <div class="pos-card">
+      <div class="pc-label">One-liner (for introductions)</div>
+      <div class="pc-text"><strong>Relay is the account manager that never sleeps.</strong> It handles every client touchpoint from brief to delivery — automatically — and brings your AM in only when a human decision is actually needed.</div>
+    </div>
+    <div class="pos-card">
+      <div class="pc-label">Category (for analyst conversations)</div>
+      <div class="pc-text"><strong>Agentic client servicing software for creative agencies.</strong> A workflow engine with AI agents that manage the full project lifecycle — intake, pricing, onboarding, production, feedback, and retention — across WhatsApp and email.</div>
+    </div>
+    <div class="pos-card">
+      <div class="pc-label">For agencies (the sales pitch)</div>
+      <div class="pc-text"><strong>Your AM should spend their time on relationships, not admin.</strong> Relay handles every message, every follow-up, every status update, and every change request — and brings your AM in only when a real decision is required. One AM can manage 4× the clients.</div>
+    </div>
+    <div class="pos-card">
+      <div class="pc-label">What it is not</div>
+      <div class="pc-text">Not a CRM. Not a project management tool. Not a chatbot. Not an email client. Relay is an <strong>agent-native operating layer</strong> that sits above your communication channels and below your creative team — the system that runs the relationship.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CORE FEATURES -->
+<div class="section">
+  <div class="section-label">03 — Feature set</div>
+  <div class="section-title">The 13-step workflow engine</div>
+  <div class="section-body">Every project runs through one workflow. 13 steps, 5 phases. Each step is either auto-executed by an agent, or queued for the AM to review. The AM is a dashboard reviewer — not an executor.</div>
+  <div class="feature-block">
+
+    <div class="phase-head"><div class="phase-num">1</div><div class="phase-name">Conversion</div></div>
+    <div class="feature-rows">
+      <div class="feature-row"><div class="fr-name">Brief intake & structuring</div><div class="fr-desc">Reads inbound WhatsApp or email. Classifies project type, scores completeness, extracts all fields, surfaces missing information as structured gap questions.</div><span class="fr-mode fm-auto">Auto</span></div>
+      <div class="feature-row"><div class="fr-name">Evaluation & pricing</div><div class="fr-desc">Scores project fit against your capabilities. Computes a line-item quote from the pricing matrix. Queues for AM to approve, override, or reject before anything goes to the client.</div><span class="fr-mode fm-gate">AM gate</span></div>
+      <div class="feature-row"><div class="fr-name">Service agreement</div><div class="fr-desc">Generates PAYG or retainer agreement from template, variables filled from the approved project scope. Sent via email (always — formal document).</div><span class="fr-mode fm-auto">Auto</span></div>
+    </div>
+
+    <div class="phase-head"><div class="phase-num">2</div><div class="phase-name">Onboarding</div></div>
+    <div class="feature-rows">
+      <div class="feature-row"><div class="fr-name">Asset collection</div><div class="fr-desc">Generates a checklist of required inputs per project type. Sends via WhatsApp. Tracks what's received. Escalates overdue items automatically. Production cannot start until complete.</div><span class="fr-mode fm-auto">Auto</span></div>
+    </div>
+
+    <div class="phase-head"><div class="phase-num">3</div><div class="phase-name">Production</div></div>
+    <div class="feature-rows">
+      <div class="feature-row"><div class="fr-name">Milestone communication</div><div class="fr-desc">Proactively tells the client where the project stands before they ask. Triggered by production stage changes. Eliminates "just checking in" messages.</div><span class="fr-mode fm-auto">Auto</span></div>
+      <div class="feature-row"><div class="fr-name">Approval & sign-off</div><div class="fr-desc">Sends a formal sign-off request at each production gate (concept, script, rough cut). Locks the approved stage. Reminder sequence if no response. Sign-off via WhatsApp prompt + email record.</div><span class="fr-mode fm-auto">Auto</span></div>
+    </div>
+
+    <div class="phase-head"><div class="phase-num">4</div><div class="phase-name">Feedback & revisions</div></div>
+    <div class="feature-rows">
+      <div class="feature-row"><div class="fr-name">Tactical feedback processing</div><div class="fr-desc">Reads every inbound feedback message. Classifies: in-scope or out-of-scope, workflow-implementable or human-editor needed. Drafts a response for AM review. Out-of-scope feedback generates a change order proposal.</div><span class="fr-mode fm-gate">AM review</span></div>
+      <div class="feature-row"><div class="fr-name">Revision round tracking</div><div class="fr-desc">Tracks rounds used vs contracted. Warns the client at 1 round remaining. Blocks further revisions without a change order once exhausted.</div><span class="fr-mode fm-auto">Auto</span></div>
+      <div class="feature-row"><div class="fr-name">Strategic feedback triage</div><div class="fr-desc">Identifies upstream, out-of-scope feedback from high-value clients. Researches the topic, prepares a summary report for the AM. AM decides whether to engage.</div><span class="fr-mode fm-gate">AM gate</span></div>
+    </div>
+
+    <div class="phase-head"><div class="phase-num">5</div><div class="phase-name">Retention & growth</div></div>
+    <div class="feature-rows">
+      <div class="feature-row"><div class="fr-name">Escalation triage</div><div class="fr-desc">Monitors sentiment across every message. Detects frustration early and flags it before the client escalates. When escalation happens, classifies reason and prepares AM context. AM decides: resolve async, schedule call, or decline.</div><span class="fr-mode fm-gate">AM gate</span></div>
+      <div class="feature-row"><div class="fr-name">Upsell identification</div><div class="fr-desc">At natural moments (delivery, positive feedback, retainer renewal), surfaces upsell opportunities based on client type and seasonal signals. AM decides whether and when to pitch.</div><span class="fr-mode fm-gate">AM gate</span></div>
+      <div class="feature-row"><div class="fr-name">Relationship health scoring</div><div class="fr-desc">Continuously scores every client account across sentiment, engagement, revision volume, and response time. Green / amber / red bands. AM sees health on the dashboard. Red triggers an automatic flag.</div><span class="fr-mode fm-bg">Background</span></div>
+      <div class="feature-row"><div class="fr-name">Conversation intelligence</div><div class="fr-desc">Indexes every message, email, and call transcript. Extracts commitments, decisions, and signals. Feeds health scoring and provides agents with long-term memory of the client relationship.</div><span class="fr-mode fm-bg">Background</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMUNICATION LAYER -->
+<div class="section">
+  <div class="section-label">04 — Communication layer</div>
+  <div class="section-title">One thread. Every channel.</div>
+  <div class="section-body">Every message from every channel — WhatsApp, email, call recordings — is normalised into a single chronological thread per project. The AM reads one stream, not three inboxes. Every outbound message is sent from the dashboard. Every inbound message is automatically attributed to the right sender from the people roster.</div>
+  <div class="add-grid" style="margin-top: 24px;">
+    <div class="add-card">
+      <div class="ac-icon" style="background: rgba(37,211,102,0.12)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="6" fill="#25d366"/><path d="M5 8.5l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ac-title">WhatsApp groups</div>
+      <div class="ac-desc">One group per client. All messages read and sent via WhatsApp MCP. Teams sending directly are also captured and attributed.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-icon" style="background: var(--blue-light)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="#0C447C" stroke-width="1.2"/><path d="M1 5l7 5 7-5" stroke="#0C447C" stroke-width="1.2"/></svg>
+      </div>
+      <div class="ac-title">Email (Outlook)</div>
+      <div class="ac-desc">Shared team inbox polled every 5 minutes. Inbound emails matched to client by sender address. Outbound from AM's account.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-icon" style="background: var(--gold-light)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="#b8860b" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="#b8860b" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ac-title">Call recordings</div>
+      <div class="ac-desc">AM uploads mp3. Gemini transcribes with tone preservation. Summary and full transcript written into the project thread.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-icon" style="background: var(--paper2)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#9a9890" stroke-width="1.2"/><path d="M5 6h6M5 9h4" stroke="#9a9890" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ac-title">People roster</div>
+      <div class="ac-desc">Every contact tagged Client or BlinkofAI. Automatic attribution on every message. Unrecognised senders flagged for AM to add.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+  </div>
+</div>
+
+<!-- ADDITIONAL FEATURES -->
+<div class="section">
+  <div class="section-label">05 — Additional features</div>
+  <div class="section-title">What else belongs in Relay</div>
+  <div class="section-body">Derived from first principles, the workflow definition, and the data model. These are not nice-to-haves — they are the features that complete the product.</div>
+  <div class="add-grid">
+    <div class="add-card">
+      <div class="ac-title">Communication obligation tracker</div>
+      <div class="ac-desc">Every step has an expected outbound message. The system tracks whether it was sent, skipped, or is overdue. Nothing falls through the gap.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">AM decision queue</div>
+      <div class="ac-desc">Every item requiring AM judgment — evaluation approval, strategic feedback, escalation — queued with full agent reasoning and a one-click action. AM spends 30 seconds per decision, not 30 minutes.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Skip with consequence</div>
+      <div class="ac-desc">AM can skip any communication obligation. Gate-step skips require AM to confirm they accept the consequence. Every skip is logged with reason.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Sign-off locking</div>
+      <div class="ac-desc">Every approved stage is locked. A client who "changes their mind" on an approved concept raises a change request — not a revision. The system enforces this contractually.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Change order engine</div>
+      <div class="ac-desc">Out-of-scope feedback automatically generates a priced change order. AM approves, client agrees. No informal scope creep.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Brief versioning</div>
+      <div class="ac-desc">The original brief is sacred — never edited. Structured versions are tracked as brief_v1, v2, brief_final. Full audit trail of what the client asked for.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Call transcript library</div>
+      <div class="ac-desc">Every call — transcribed, summarised, tagged (key decisions, upsell signals, commitments). Searchable. Linked to the project thread at the exact chronological position.</div>
+      <span class="ac-tag tag-mvp">MVP</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Workflow template editor</div>
+      <div class="ac-desc">Agencies edit their own workflow — add steps, change delivery modes, set channel defaults, configure triggers. No code deploy needed.</div>
+      <span class="ac-tag tag-v2">v2</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Portfolio analytics</div>
+      <div class="ac-desc">Cross-project insights: average health score, revision rate by client type, escalation frequency, AM response time, revenue pipeline. The agency learns over time.</div>
+      <span class="ac-tag tag-v2">v2</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Connector marketplace</div>
+      <div class="ac-desc">Agencies enable connectors from a library: Slack, Notion, HubSpot, Razorpay, Google Drive. Each is an MCP server. Enable = one click. No code changes.</div>
+      <span class="ac-tag tag-v2">v2</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Multi-AM support</div>
+      <div class="ac-desc">Multiple AMs per agency, each owning specific clients. AM queue scoped per AM. Project assignment and notification routing.</div>
+      <span class="ac-tag tag-v2">v2</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Pattern recognition</div>
+      <div class="ac-desc">Cross-project intelligence: which brief types have the most revision rounds, which client segments escalate most, where scope creep originates. The system gets smarter as it processes more projects.</div>
+      <span class="ac-tag tag-v3">v3</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Client portal</div>
+      <div class="ac-desc">Optional login for clients to upload assets, check project status, and submit formal approvals. Reduces WhatsApp dependency for structured actions.</div>
+      <span class="ac-tag tag-v3">v3</span>
+    </div>
+    <div class="add-card">
+      <div class="ac-title">Agency benchmarks</div>
+      <div class="ac-desc">Anonymous benchmarks across Relay agencies: median project duration, average revision rounds, escalation rates by industry. Agencies see where they stand.</div>
+      <span class="ac-tag tag-v3">v3</span>
+    </div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="section">
+  <div class="section-label">06 — Technical foundation</div>
+  <div class="section-title">Built to grow into a platform</div>
+  <div class="section-body">MVP uses the simplest viable stack. Architecture is designed so the SaaS layer (multi-tenancy, connector marketplace, analytics) can be added on top without rebuilding the core.</div>
+  <div class="stack-grid">
+    <div class="stack-card">
+      <div class="sc-layer">Frontend</div>
+      <div class="sc-tech">React + TypeScript</div>
+      <div class="sc-desc">TanStack Query for server state. Firestore real-time listeners for live updates. One dashboard — AM only for MVP.</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">API layer</div>
+      <div class="sc-tech">FastAPI (Python)</div>
+      <div class="sc-desc">REST endpoints for AM actions. Firebase Admin SDK for token verification. Inbound webhook receivers for WhatsApp and email.</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">Workflow engine</div>
+      <div class="sc-tech">LangGraph</div>
+      <div class="sc-desc">Graph execution for all 13 steps. Human-in-the-loop interrupt nodes for AM gates. Checkpoint to Firestore for recovery.</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">Agent runtime</div>
+      <div class="sc-tech">Nanobot (HKUDS)</div>
+      <div class="sc-desc">5 specialised agents: Brief, Delivery, Feedback, Escalation, Intelligence. Stateless — context injected at invocation by LangGraph.</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">Storage (MVP)</div>
+      <div class="sc-tech">Firebase (Firestore + Storage)</div>
+      <div class="sc-desc">Firestore for all structured data and event log. Firebase Storage for files. Real-time listeners replace WebSocket complexity.</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">Auth</div>
+      <div class="sc-tech">Firebase Auth</div>
+      <div class="sc-desc">Google sign-in. Single whitelisted AM account for MVP. JWT with Firebase ID token on every API request.</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">Connectors</div>
+      <div class="sc-tech">MCP protocol</div>
+      <div class="sc-desc">WhatsApp MCP, Microsoft Graph (Outlook), Gemini audio, Flask.do (TBC). Each is a discrete MCP server — swappable without agent changes.</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">LLM</div>
+      <div class="sc-tech">Claude Sonnet</div>
+      <div class="sc-desc">Primary reasoning model for all 5 agents. Gemini audio-native for call transcription (tone and prosody preservation).</div>
+    </div>
+    <div class="stack-card">
+      <div class="sc-layer">Storage (v2)</div>
+      <div class="sc-tech">PostgreSQL + Redis</div>
+      <div class="sc-desc">Schema-per-tenant isolation, row-level security, LangGraph native PostgreSQL checkpointer. Redis for AM queue and WebSocket broadcast.</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITIVE POSITIONING -->
+<div class="section">
+  <div class="section-label">07 — Market context</div>
+  <div class="section-title">What Relay is not competing with</div>
+  <div class="section-body">Understanding where Relay sits clarifies what it is.</div>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="cc-what">CRMs</div>
+      <div class="cc-name">HubSpot, Salesforce</div>
+      <div class="cc-how">CRMs store contact data. Relay executes workflows. A CRM is a database. Relay is an agent that acts.</div>
+    </div>
+    <div class="comp-card">
+      <div class="cc-what">Project management</div>
+      <div class="cc-name">Asana, Linear, Notion</div>
+      <div class="cc-how">These track tasks for internal teams. Relay manages the client relationship — the external-facing layer.</div>
+    </div>
+    <div class="comp-card">
+      <div class="cc-what">Agency platforms</div>
+      <div class="cc-name">Function Point, Teamwork</div>
+      <div class="cc-how">Generic agency tools built for project management, not for agentic client communication. No AI layer.</div>
+    </div>
+    <div class="comp-card">
+      <div class="cc-what">AI chat tools</div>
+      <div class="cc-name">Intercom AI, Tidio</div>
+      <div class="cc-how">These handle customer support chat. Relay handles complex multi-step project workflows with formal agreements, pricing, and sign-offs.</div>
+    </div>
+    <div class="comp-card">
+      <div class="cc-what">WhatsApp tools</div>
+      <div class="cc-name">AiSensy, WATI</div>
+      <div class="cc-how">These broadcast and respond via WhatsApp. Relay uses WhatsApp as one channel in a broader workflow — it reasons, it gates, it acts.</div>
+    </div>
+    <div class="comp-card">
+      <div class="cc-what">Nearest analogue</div>
+      <div class="cc-name">Nothing quite like this exists</div>
+      <div class="cc-how">Relay is what happens when you take the full client-facing AM workflow and build an agentic layer underneath it. This category doesn't have a name yet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BUILD SEQUENCE -->
+<div class="section">
+  <div class="section-label">08 — Build sequence</div>
+  <div class="section-title">From working demo to live system</div>
+  <div class="section-body">Each step is a working system at the end. Never start the next step until the current one is tested with real data. BlinkofAI goes live at step 8. Steps 9 onwards productise it.</div>
+  <div class="seq-list">
+    <div class="seq-item"><div class="si-num">01</div><div><div class="si-title">Knowledge base files</div><div class="si-detail">Write all 16 KB files: brief_taxonomy, pricing_matrix, scope_of_work_rules, workflow_capabilities, message_templates, tone_and_voice, agreement_templates, revision_policy, asset_checklist_rules, production_stages, escalation_rules, upsell_triggers, health_scoring_rules, client_tiers, service_catalog, company_profile. Content work — requires Sandeep. Nothing downstream works without these.</div><div class="si-tech">Markdown files · Firebase Storage · manual authoring</div></div></div>
+    <div class="seq-item"><div class="si-num">02</div><div><div class="si-title">Firestore schema + Firebase project</div><div class="si-detail">Create all collections: clients, projects, messages, am_queue, events, workflow_state. Create Firebase Storage buckets: call_recordings, agreements, assets, kb. Set up Firebase Auth with Google sign-in, whitelist the AM's Google account.</div><div class="si-tech">Firestore · Firebase Storage · Firebase Auth</div></div></div>
+    <div class="seq-item"><div class="si-num">03</div><div><div class="si-title">Brief agent — isolated test</div><div class="si-detail">Build and test the Brief agent in Nanobot. Load KB files as skills from Firebase Storage. Test with 10 real historical briefs from BlinkofAI. Verify: project type classification, completeness scoring, gap question generation, structured brief output. Do not wire to LangGraph yet.</div><div class="si-tech">Nanobot · Claude Sonnet · brief_taxonomy skill</div></div></div>
+    <div class="seq-item"><div class="si-num">04</div><div><div class="si-title">LangGraph graph — F01 + F02</div><div class="si-detail">Build the workflow graph with F01 (brief intake) and F02 (evaluation + pricing) as the first two nodes. F02 uses interrupt_before — AM gate. Test the full checkpoint-suspend-resume cycle manually. Verify: graph pauses at F02, AM decision injected, graph resumes, project_card written to Firestore.</div><div class="si-tech">LangGraph · Firestore checkpointer · ProjectState TypedDict</div></div></div>
+    <div class="seq-item"><div class="si-num">05</div><div><div class="si-title">FastAPI backend + WhatsApp MCP</div><div class="si-detail">Build FastAPI with Firebase Admin SDK auth. Wire WhatsApp MCP. Build inbound webhook receiver: message arrives → normalised → written to Firestore messages collection → LangGraph graph triggered for that project. Test the full path: WhatsApp brief → agent runs → am_queue item written.</div><div class="si-tech">FastAPI · WhatsApp MCP · Firebase Admin SDK · QR auth</div></div></div>
+    <div class="seq-item"><div class="si-num">06</div><div><div class="si-title">Outlook connector</div><div class="si-detail">Wire Microsoft Graph API. Poll every 5 minutes. Match inbound emails to client by sender email address. Normalise to message schema. Write to messages collection. Test: client sends email → appears in project thread.</div><div class="si-tech">Microsoft Graph API · OAuth2 delegated permissions</div></div></div>
+    <div class="seq-item"><div class="si-num">07</div><div><div class="si-title">React dashboard — core</div><div class="si-detail">Build client list, project detail (overview + workflow tracker + message thread), AM queue panel, flags strip. Wire Firestore real-time listeners for live updates. Wire AM actions (approve, skip, note, sign-off) to FastAPI endpoints. Test the full loop: message → agent → queue → AM approves → workflow advances → dashboard updates live.</div><div class="si-tech">React · TanStack Query · Firestore listeners</div></div></div>
+    <div class="seq-item"><div class="si-num">08</div><div><div class="si-title">All remaining agents + full workflow</div><div class="si-detail">Add Delivery (F03–F06), Feedback (F07–F09), Escalation (F10–F11), Intelligence (F12–F13) agents. Add all remaining graph nodes. Wire Gemini audio for call transcription. Wire call upload in dashboard. Add APScheduler for daily F12/F13 runs. Run BlinkofAI live on this system for 4–6 weeks. Real usage finds what tests miss.</div><div class="si-tech">All 5 Nanobot agents · Gemini audio API · APScheduler</div></div></div>
+    <div class="seq-item"><div class="si-num">09+</div><div><div class="si-title">SaaS productisation</div><div class="si-detail">Tenant onboarding, self-serve signup, connector marketplace, workflow template editor, PostgreSQL migration (schema-per-tenant), Infisical credential vault, usage metering, Stripe billing, super admin console. Only after BlinkofAI has been running live for several weeks and the core product is stable.</div><div class="si-tech">PostgreSQL · Redis · Infisical · Stripe · multi-tenant architecture</div></div></div>
+  </div>
+</div>
+
+</div>
+
+<hr class="divider">
+<div class="footer">
+  <div class="footer-name">Relay</div>
+  <div class="footer-meta">BlinkofAI internal document · April 2026 · confidential</div>
+</div>
+
+</body>
+</html>
